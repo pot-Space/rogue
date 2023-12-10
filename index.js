@@ -1,13 +1,19 @@
 'use strict';
 
 const field = document.querySelector('.field');
-const char = {
+const player = {
+   maxHealth: 10,
    health: 1,
    attackPower: 1,
 }
 
+// ===================
+// Параметры для класса
+const maxWidth = 40,
+   maxHeight = 24;
+// ===================
 
-for (let i = 1; i < 40 * 24; i++) {
+for (let i = 1; i < maxWidth * maxHeight; i++) {
    const tile = document.createElement('div');
    tile.className = 'tile';
    field.append(tile);
@@ -16,77 +22,142 @@ for (let i = 1; i < 40 * 24; i++) {
 
 let arrField = [...field.children]; // == Array.from()
 
+console.log(arrField);
 
 document.addEventListener('keydown', event => {
-   const charTile = document.querySelector('.tileP');
-   const currentPosition = arrField.indexOf(charTile);
+   const playerTile = document.querySelector('.tileP');
+   const currentTile = arrField.indexOf(playerTile);
 
    // направо
-   if (event.code == 'KeyD' && (currentPosition == 0 || currentPosition % 39 != 0)) {
-      const nextPosition = arrField[currentPosition + 1];
+   if (event.code == 'KeyD' && (currentTile == 0 || (currentTile + 1) % maxWidth != 0)) {
+      const nextTile = arrField[currentTile + 1];
 
-      setCharState(nextPosition.className);
-
-      arrField[currentPosition].className = 'tile';
-      nextPosition.className = 'tileP';
+      setPlayerState(nextTile.className);
+      setTileState(arrField[currentTile], nextTile);
    }
 
    // налево
-   if (event.code == 'KeyA' && (currentPosition % 40 != 0)) {
-      const nextPosition = arrField[currentPosition - 1];
+   if (event.code == 'KeyA' && (currentTile % maxWidth != 0)) {
+      const nextTile = arrField[currentTile - 1];
 
-      setCharState(nextPosition.className);
-
-      arrField[currentPosition].className = 'tile';
-      nextPosition.className = 'tileP';
-
+      setPlayerState(nextTile.className);
+      setTileState(arrField[currentTile], nextTile);
    }
 
    // вниз
-   if (event.code == 'KeyS' && (currentPosition + 40 < arrField.length)) {
-      const nextPosition = arrField[currentPosition + 40];
+   if (event.code == 'KeyS' && (currentTile + maxWidth < arrField.length)) {
+      const nextTile = arrField[currentTile + maxWidth];
 
-      setCharState(nextPosition.className);
-
-      arrField[currentPosition].className = 'tile';
-      nextPosition.className = 'tileP';
-
+      setPlayerState(nextTile.className);
+      setTileState(arrField[currentTile], nextTile);
    }
 
    // вверх
-   if (event.code == 'KeyW' && (currentPosition - 40 >= 0)) {
-      const nextPosition = arrField[currentPosition - 40];
+   if (event.code == 'KeyW' && (currentTile - maxWidth >= 0)) {
+      const nextTile = arrField[currentTile - maxWidth];
 
-      setCharState(nextPosition.className);
+      setPlayerState(nextTile.className);
+      setTileState(arrField[currentTile], nextTile);
+   }
 
-      arrField[currentPosition].className = 'tile';
-      nextPosition.className = 'tileP';
+   if (event.code == 'Space') {
+      event.preventDefault();
+      onAttack(currentTile);
    }
 });
 
-
-function setCharState(classTile) {
+function setPlayerState(classTile) {
    switch (classTile) {
       case 'tileHP':
-         if (char.health < 5) {  // * фиксированный порог HP
-            char.health = char.health + 1;
-            changeHP();
+         if (player.health < player.maxHealth) {  // * фиксированный порог HP
+            player.health = player.health + 1;
          }
-         console.log(char);
+         console.log(player);
          break;
 
       case 'tileSW':
-         char.attackPower = char.attackPower + 1;
-         console.log(char);
+         player.attackPower = player.attackPower + 1;
+         console.log(player);
          break;
    }
 }
 
-function changeHP() {
-   let newHP = 120 / 5 * char.health;
-   document.querySelector('.tileP').style.setProperty('--hp-current', newHP);
+function setTileState(currentTile, nextTile) {
+   currentTile.innerHTML = '';
+   currentTile.className = 'tile';
+   nextTile.className = 'tileP';
+
+   const health = document.createElement('div');
+   health.className = 'health';
+   health.style.width = `${player.health * 100 / player.maxHealth}%`;
+   nextTile.append(health);
+}
+
+function onAttack(currentTile) {
+   const attackArea = [
+      // arrField[currentTile - maxWidth - 1],
+      // arrField[currentTile - maxWidth],
+      // arrField[currentTile - maxWidth + 1],
+      // arrField[currentTile - 1],
+      // arrField[currentTile + 1],
+      // arrField[currentTile + maxWidth - 1],
+      // arrField[currentTile + maxWidth],
+      // arrField[currentTile + maxWidth + 1]
+
+      // currentTile - maxWidth - 1,
+      // currentTile - maxWidth,
+      // currentTile - maxWidth + 1,
+      // currentTile - 1,
+      // currentTile + 1,
+      // currentTile + maxWidth - 1,
+      // currentTile + maxWidth,
+      // currentTile + maxWidth + 1
+   ];
+
+   // правый тайл
+   if (arrField[currentTile + 1] !== 'undefined' && (currentTile + 1) % maxWidth != 0) {
+      attackArea.push(arrField[currentTile + 1]);
+   }
+   // левый тайл
+   if (arrField[currentTile - 1] !== 'undefined' && (currentTile % maxWidth != 0)) {
+      attackArea.push(arrField[currentTile - 1]);
+   }
+   // нижний тайл
+   if (arrField[currentTile + maxWidth] !== 'undefined' && (currentTile + maxWidth < arrField.length)) {
+      attackArea.push(arrField[currentTile + maxWidth]);
+   }
+   // верхний тайл
+   if (arrField[currentTile - maxWidth] !== 'undefined' && (currentTile - maxWidth >= 0)) {
+      attackArea.push(arrField[currentTile - maxWidth]);
+   }
+   // нижний правый тайл
+   if (arrField[currentTile + maxWidth] !== 'undefined' && (currentTile + maxWidth < arrField.length) && (currentTile + 1) % maxWidth != 0) {
+      attackArea.push(arrField[currentTile + maxWidth + 1]);
+   }
+   // нижний левый тайл
+   if (arrField[currentTile + maxWidth] !== 'undefined' && (currentTile + maxWidth < arrField.length) && currentTile % maxWidth != 0) {
+      attackArea.push(arrField[currentTile + maxWidth - 1]);
+   }
+   // верхний правый тайл
+   if (arrField[currentTile - maxWidth] !== 'undefined' && (currentTile - maxWidth >= 0) && (currentTile + 1) % maxWidth != 0) {
+      attackArea.push(arrField[currentTile - maxWidth + 1]);
+   }
+   // верхний левый тайл
+   if (arrField[currentTile - maxWidth] !== 'undefined' && (currentTile - maxWidth >= 0) && currentTile % maxWidth != 0) {
+      attackArea.push(arrField[currentTile - maxWidth - 1]);
+   }
+
+
+
+   // console.log(attackArea);
+
+   attackArea.forEach(item => {
+      if (item.classList.contains('tileE')) {
+         console.log(item);
+      }
+   });
 }
 
 
 
-console.log(char);
+console.log(player);

@@ -23,8 +23,8 @@ h1 {
 .field {
    position: relative;
    display: grid;
-   grid-template-columns: repeat(40, 30px);
-   grid-template-rows: repeat(24, 30px);
+   grid-template-columns: repeat(40, 35px);
+   grid-template-rows: repeat(24, 35px);
 
    .tile,
    .tileW,
@@ -38,6 +38,15 @@ h1 {
    .tile {
       background-image: url(../images/tile-.png);
       background-size: cover;
+
+      .health {
+         background-color: #ff0000;
+         // z-index: 11;
+         position: absolute;
+         left: 0px;
+         top: 0px;
+         height: 3px;
+      }
    }
 
    .tileW {
@@ -53,15 +62,13 @@ h1 {
       position: relative;
       background-image: url(../images/tile-P.png);
 
-      &::before {
-         content: '';
+      .health {
+         background-color: #00ff00;
+         z-index: 11;
          position: absolute;
-         display: block;
-         width: 120%;
+         left: 0px;
+         top: 0px;
          height: 3px;
-         top: 0;
-         left: -25%;
-         background-color: #333;
       }
    }
 
@@ -72,25 +79,6 @@ h1 {
    .tileSW {
       background-image: url(../images/tile-SW.png);
    }
-}
-
-
-.field .tile .health {
-   background-color: #ff0000;
-   z-index: 11;
-   position: absolute;
-   left: 0px;
-   top: 0px;
-   height: 3px;
-}
-
-.field .tileP .health {
-   background-color: #00ff00;
-   z-index: 11;
-   position: absolute;
-   left: 0px;
-   top: 0px;
-   height: 3px;
 }
 
 .inventory-box {
