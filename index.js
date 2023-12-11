@@ -2,25 +2,19 @@
 
 const field = document.querySelector('.field');
 
-// const player = {
-//    tile: 'tileP',
-//    maxHealth: 10,
-//    health: 5,
-//    attackPower: 5,
-// };
-
 class Player {
-   name = 'p-1';
+   constructor(name) {
+      this.name = name;
+   };
 
    state = {
       tile: 'tileP',
       maxHealth: 10,
-      health: 5,
+      health: 10,
       attackPower: 1,
    }
 };
-
-const player = new Player();
+const player = new Player('p-1');
 
 class Enemy {
    constructor(name) {
@@ -55,13 +49,16 @@ for (let i = 0; i < maxWidth * maxHeight; i++) {
    if (i == 0) {
       tile.className = 'tileP';
       field.append(tile);
+
    } else if (i == 47 || i == 15 || i == 14 || i == 40) {
       tile.className = 'tileE';
       tile.id = `e-${i}`;
       field.append(tile);
+
    } else if (i == 2) {
       tile.className = 'tileHP';
       field.append(tile);
+
    } else if (i == 1) {
       tile.className = 'tileSW';
       field.append(tile);
@@ -75,60 +72,48 @@ for (let i = 0; i < maxWidth * maxHeight; i++) {
 
 const arrayField = [...field.children]; // == Array.from()
 const collectionEnemy = document.querySelectorAll('.tileE');
-// console.log(arrayField);
 
 // ===================
 // arrey enemy
 let arrayEnemy = [];
 collectionEnemy.forEach(item => {
    arrayEnemy.push(new Enemy(item.id));
-
 });
-// console.log(arrayEnemy); 
-// console.log(arrayEnemy[0].name);
 // ===================
 
-function randomSide(min, max) {
+function randomNum(min, max) {
    const rand = min + Math.random() * (max + 1 - min);
    return Math.floor(rand);
 }
 
-function onMove(char) {
+function onEnemyMove(char) {
    const currentTile = char.currentTile();
-   const side = randomSide(1, 4);
+   const side = randomNum(1, 4);
+   let nextTile;
 
    // направо
    if (side == 1 && (currentTile == 0 || (currentTile + 1) % maxWidth != 0)) {
-      const nextTile = arrayField[currentTile + 1];
-
-      // setPlayerState(nextTile.className);
+      nextTile = arrayField[currentTile + 1];
       setTileState(arrayField[currentTile], nextTile, char);
    }
    // налево
    if (side == 2 && (currentTile % maxWidth != 0)) {
-      const nextTile = arrayField[currentTile - 1];
-
-      // setPlayerState(nextTile.className);
+      nextTile = arrayField[currentTile - 1];
       setTileState(arrayField[currentTile], nextTile, char);
    }
    // вниз
    if (side == 3 && (currentTile + maxWidth < arrayField.length)) {
-      const nextTile = arrayField[currentTile + maxWidth];
-
-      // setPlayerState(nextTile.className);
+      nextTile = arrayField[currentTile + maxWidth];
       setTileState(arrayField[currentTile], nextTile, char);
    }
    // вверх
    if (side == 4 && (currentTile - maxWidth >= 0)) {
-      const nextTile = arrayField[currentTile - maxWidth];
-
-      // setPlayerState(nextTile.className);
+      nextTile = arrayField[currentTile - maxWidth];
       setTileState(arrayField[currentTile], nextTile, char);
    }
 }
 
-
-document.addEventListener('keydown', event => {
+function onPlayerMove(event) {
    const playerTile = document.querySelector('.tileP');
    const currentTile = arrayField.indexOf(playerTile);
 
@@ -138,9 +123,7 @@ document.addEventListener('keydown', event => {
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
-
       enemyAction();
-
    }
    // налево
    if (event.code == 'KeyA' && (currentTile % maxWidth != 0)) {
@@ -148,9 +131,7 @@ document.addEventListener('keydown', event => {
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
-
       enemyAction();
-
    }
    // вниз
    if (event.code == 'KeyS' && (currentTile + maxWidth < arrayField.length)) {
@@ -158,9 +139,7 @@ document.addEventListener('keydown', event => {
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
-
       enemyAction();
-
    }
    // вверх
    if (event.code == 'KeyW' && (currentTile - maxWidth >= 0)) {
@@ -168,20 +147,17 @@ document.addEventListener('keydown', event => {
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
-
       enemyAction();
-
    }
 
    if (event.code == 'Space') {
       event.preventDefault();
-      onAttack(currentTile);
-
-
-
+      setTileState(arrayField[currentTile], arrayField[currentTile], player);
+      onAttack(currentTile, player);
       enemyAction();
    }
-});
+}
+document.addEventListener('keydown', onPlayerMove);
 
 function setPlayerState(classTile) {
    switch (classTile) {
@@ -202,16 +178,20 @@ function setPlayerState(classTile) {
 function setTileState(currentTile, nextTile, char) {
    const health = document.createElement('div');
    health.className = 'health';
-   health.style.width = `${char.state.health * 100 / char.state.maxHealth}%`;
-
+   health.style.width = `${(char.state.health - 1) * 100 / char.state.maxHealth}%`;
 
    if (arrayField.indexOf(currentTile) == arrayField.indexOf(nextTile)) {
 
-      console.log('== stay');
-
       currentTile.innerHTML = '';
-      currentTile.append(health);
+      currentTile.className = 'tile';
+      currentTile.removeAttribute('id');
+      nextTile.className = char.state.tile;
+      nextTile.id = char.name;
+      nextTile.append(health);
+
+      console.log('stay');
    }
+
    if ((arrayField.indexOf(currentTile) != arrayField.indexOf(nextTile))
       && !(nextTile.classList.contains('tileE') || nextTile.classList.contains('tileW') || nextTile.classList.contains('tileP'))
       && char.state.health > 0) {
@@ -225,18 +205,27 @@ function setTileState(currentTile, nextTile, char) {
 }
 
 function enemyAction() {
-   // set enemy HP
    arrayEnemy.forEach(char => {
-      // setTileState(char.enemyTile(), char.enemyTile(), char);
+      if (char.state.health > 0) {
+         let attackArea = getAttackArea(char.currentTile());
+         let attack = false;
+         attackArea.forEach(item => {
+            if (item.classList.contains('tileP')) {
+               attack = true;
+            }
+         });
 
-      onMove(char);
+         if (attack) {
+            onAttack(char.currentTile(), char);
+         } else {
+            onEnemyMove(char);
+         }
+      }
    });
-
-
-
 }
 
-function onAttack(currentTile) {
+
+function getAttackArea(currentTile) {
    const attackArea = [];
    // правый тайл
    if (arrayField[currentTile + 1] !== 'undefined' && (currentTile + 1) % maxWidth != 0) {
@@ -271,30 +260,43 @@ function onAttack(currentTile) {
       attackArea.push(arrayField[currentTile - maxWidth - 1]);
    }
 
+   return attackArea;
+}
 
-   // console.log(attackArea);
+function onAttack(currentTile, char) {
+   const attackArea = getAttackArea(currentTile);
 
-   attackArea.forEach(item => {
-      if (item.classList.contains('tileE')) {
-         // console.log(item);
+   if (char.state.tile == 'tileP') {
+      attackArea.forEach(item => {
+         if (item.classList.contains('tileE')) {
+            for (let i = 0; i < arrayEnemy.length; i++) {
+               if (item.id == arrayEnemy[i].name) {
+                  arrayEnemy[i].state.health = arrayEnemy[i].state.health - 1;
 
-         for (let i = 0; i < arrayEnemy.length; i++) {
-            if (item.id == arrayEnemy[i].name) {
-               arrayEnemy[i].state.health = arrayEnemy[i].state.health - 1;
-
-
-               if (arrayEnemy[i].state.health == 0) {
-                  item.innerHTML = '';
-                  item.className = 'tile';
-                  item.removeAttribute('id');
+                  if (arrayEnemy[i].state.health == 0) {
+                     item.innerHTML = '';
+                     item.className = 'tile';
+                     item.removeAttribute('id');
+                  }
                }
             }
          }
+      });
+   } else {
+      setTileState(char.enemyTile(), char.enemyTile(), char);
 
+      attackArea.forEach(item => {
+         if (item.classList.contains('tileP')) {
+            player.state.health = player.state.health - 1;
+            console.log(player.state.health);
+
+         }
+      });
+      if (player.state.health == 0) {
+         document.removeEventListener('keydown', onPlayerMove);
+         document.querySelector('body h1').innerHTML = 'game over';
       }
-   });
+   }
 }
-
-
 
 console.log(player);
