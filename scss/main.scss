@@ -37,16 +37,6 @@ h1 {
 
    .tile {
       background-image: url(../images/tile-.png);
-      background-size: cover;
-
-      .health {
-         background-color: #ff0000;
-         // z-index: 11;
-         position: absolute;
-         left: 0px;
-         top: 0px;
-         height: 3px;
-      }
    }
 
    .tileW {
@@ -54,8 +44,16 @@ h1 {
    }
 
    .tileE {
+      position: relative;
       background-image: url(../images/tile-E.png);
-      background-size: cover;
+
+      .health {
+         background-color: #ff0000;
+         position: absolute;
+         left: 0px;
+         top: 0px;
+         height: 3px;
+      }
    }
 
    .tileP {
@@ -64,7 +62,6 @@ h1 {
 
       .health {
          background-color: #00ff00;
-         z-index: 11;
          position: absolute;
          left: 0px;
          top: 0px;
