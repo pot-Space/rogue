@@ -95,8 +95,7 @@ function randomSide(min, max) {
 
 function onMove(char) {
    const currentTile = char.currentTile();
-
-   let side = randomSide(1, 4);
+   const side = randomSide(1, 4);
 
    // направо
    if (side == 1 && (currentTile == 0 || (currentTile + 1) % maxWidth != 0)) {
@@ -180,7 +179,7 @@ document.addEventListener('keydown', event => {
 
 
 
-      // enemyAction();
+      enemyAction();
    }
 });
 
@@ -206,21 +205,19 @@ function setTileState(currentTile, nextTile, char) {
    health.style.width = `${char.state.health * 100 / char.state.maxHealth}%`;
 
 
-   // if (currentTile == nextTile) {
    if (arrayField.indexOf(currentTile) == arrayField.indexOf(nextTile)) {
-      // console.log(arrayField.indexOf(arrayField[currentTile]), arrayField.indexOf(nextTile));
 
       console.log('== stay');
-
 
       currentTile.innerHTML = '';
       currentTile.append(health);
    }
    if ((arrayField.indexOf(currentTile) != arrayField.indexOf(nextTile))
-      && !(nextTile.classList.contains('tileE') || nextTile.classList.contains('tileW') || nextTile.classList.contains('tileP'))) {
+      && !(nextTile.classList.contains('tileE') || nextTile.classList.contains('tileW') || nextTile.classList.contains('tileP'))
+      && char.state.health > 0) {
       currentTile.innerHTML = '';
       currentTile.className = 'tile';
-      currentTile.id = '';
+      currentTile.removeAttribute('id');
       nextTile.className = char.state.tile;
       nextTile.id = char.name;
       nextTile.append(health);
@@ -285,11 +282,11 @@ function onAttack(currentTile) {
             if (item.id == arrayEnemy[i].name) {
                arrayEnemy[i].state.health = arrayEnemy[i].state.health - 1;
 
-               console.log(arrayEnemy[i].enemyTile());
-               console.log(arrayEnemy[i].currentTile());
 
                if (arrayEnemy[i].state.health == 0) {
+                  item.innerHTML = '';
                   item.className = 'tile';
+                  item.removeAttribute('id');
                }
             }
          }
