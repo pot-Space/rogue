@@ -1,5 +1,10 @@
 'use strict';
 
+// =================
+const maxWidth = 40,
+   maxHeight = 24;
+// =================
+
 const field = document.querySelector('.field');
 
 class Player {
@@ -38,45 +43,78 @@ class Enemy {
 
 };
 
-// ===================
-const maxWidth = 40,
-   maxHeight = 24;
-// ===================
-
 for (let i = 0; i < maxWidth * maxHeight; i++) {
    const tile = document.createElement('div');
 
-   if (i == 0) {
-      tile.className = 'tileP';
-      field.append(tile);
+   // if (i == 0) {
+   //    tile.className = 'tileP';
+   //    field.append(tile);
 
-   } else if (i == 47 || i == 15 || i == 14 || i == 40) {
-      tile.className = 'tileE';
-      tile.id = `e-${i}`;
-      field.append(tile);
+   // } else if (i == 47 || i == 15 || i == 14 || i == 40) {
+   //    tile.className = 'tileE';
+   //    tile.id = `e-${i}`;
+   //    field.append(tile);
 
-   } else if (i == 2) {
-      tile.className = 'tileHP';
-      field.append(tile);
+   // } else if (i == 2) {
+   //    tile.className = 'tileHP';
+   //    field.append(tile);
 
-   } else if (i == 1) {
-      tile.className = 'tileSW';
-      field.append(tile);
-   }
-   else {
-      tile.className = 'tile';
-      field.append(tile);
-   }
+   // } else if (i == 1) {
+   //    tile.className = 'tileSW';
+   //    field.append(tile);
+   // }
+   // else {
+   //    tile.className = 'tile';
+   //    field.append(tile);
+   // }
+
+   tile.className = 'tileW';
+   field.append(tile);
 }
 
 
 const arrayField = [...field.children]; // == Array.from()
-const collectionEnemy = document.querySelectorAll('.tileE');
+
+
+// Cлучайное количество 5-10 tile с размерами 3-8 ДxШ
+// Cлучайное количество 3-5 по каждому направлению вертикальных и горизонтальных проходов в 1 tile
+
+const roomArray = [];
+const roomCount = randomNum(5, 10);
+
+for (let i = 1; i <= roomCount; i++) {
+   roomArray.push({ h: randomNum(3, 8), w: randomNum(3, 8) });
+}
+console.log(roomArray);
+
+
+let startCount = randomNum(0, 160);
+console.log(startCount);
+
+function roomRender() {
+   roomArray.forEach(item => {
+
+      roomDrow(item, startCount);
+      startCount = startCount + randomNum(item.w + 1, 120);
+   });
+
+}
+roomRender();
+
+function roomDrow(item, coord) {
+   if ((coord + 1) % 40 == 0) {
+      coord = coord + randomNum(1, 40);
+   }
+   for (let i = 0; i < (item.h * maxWidth); i = i + maxWidth) {
+      for (let j = i; j < (i + item.w); j++) {
+         arrayField[j + coord].className = 'tile';
+      }
+   }
+};
 
 // ===================
-// arrey enemy
 let arrayEnemy = [];
-collectionEnemy.forEach(item => {
+document.querySelectorAll('.tileE').forEach(item => {
    arrayEnemy.push(new Enemy(item.id));
 });
 // ===================
@@ -114,12 +152,12 @@ function onEnemyMove(char) {
 }
 
 function onPlayerMove(event) {
-   const playerTile = document.querySelector('.tileP');
-   const currentTile = arrayField.indexOf(playerTile);
+   const currentTile = arrayField.indexOf(document.querySelector('.tileP'));
+   let nextTile;
 
    // направо
    if (event.code == 'KeyD' && (currentTile == 0 || (currentTile + 1) % maxWidth != 0)) {
-      const nextTile = arrayField[currentTile + 1];
+      nextTile = arrayField[currentTile + 1];
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
@@ -127,7 +165,7 @@ function onPlayerMove(event) {
    }
    // налево
    if (event.code == 'KeyA' && (currentTile % maxWidth != 0)) {
-      const nextTile = arrayField[currentTile - 1];
+      nextTile = arrayField[currentTile - 1];
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
@@ -135,7 +173,7 @@ function onPlayerMove(event) {
    }
    // вниз
    if (event.code == 'KeyS' && (currentTile + maxWidth < arrayField.length)) {
-      const nextTile = arrayField[currentTile + maxWidth];
+      nextTile = arrayField[currentTile + maxWidth];
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
@@ -143,13 +181,13 @@ function onPlayerMove(event) {
    }
    // вверх
    if (event.code == 'KeyW' && (currentTile - maxWidth >= 0)) {
-      const nextTile = arrayField[currentTile - maxWidth];
+      nextTile = arrayField[currentTile - maxWidth];
 
       setPlayerState(nextTile.className);
       setTileState(arrayField[currentTile], nextTile, player);
       enemyAction();
    }
-
+   // атака
    if (event.code == 'Space') {
       event.preventDefault();
       setTileState(arrayField[currentTile], arrayField[currentTile], player);
@@ -181,15 +219,12 @@ function setTileState(currentTile, nextTile, char) {
    health.style.width = `${(char.state.health - 1) * 100 / char.state.maxHealth}%`;
 
    if (arrayField.indexOf(currentTile) == arrayField.indexOf(nextTile)) {
-
       currentTile.innerHTML = '';
       currentTile.className = 'tile';
       currentTile.removeAttribute('id');
       nextTile.className = char.state.tile;
       nextTile.id = char.name;
       nextTile.append(health);
-
-      console.log('stay');
    }
 
    if ((arrayField.indexOf(currentTile) != arrayField.indexOf(nextTile))
@@ -223,7 +258,6 @@ function enemyAction() {
       }
    });
 }
-
 
 function getAttackArea(currentTile) {
    const attackArea = [];
@@ -259,7 +293,6 @@ function getAttackArea(currentTile) {
    if (arrayField[currentTile - maxWidth] !== 'undefined' && (currentTile - maxWidth >= 0) && currentTile % maxWidth != 0) {
       attackArea.push(arrayField[currentTile - maxWidth - 1]);
    }
-
    return attackArea;
 }
 
@@ -288,10 +321,9 @@ function onAttack(currentTile, char) {
       attackArea.forEach(item => {
          if (item.classList.contains('tileP')) {
             player.state.health = player.state.health - 1;
-            console.log(player.state.health);
-
          }
       });
+
       if (player.state.health == 0) {
          document.removeEventListener('keydown', onPlayerMove);
          document.querySelector('body h1').innerHTML = 'game over';
