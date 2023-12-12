@@ -89,24 +89,30 @@ console.log(roomArray);
 
 
 let startCount = randomNum(0, 160);
-console.log(startCount);
 
-function roomRender() {
-   roomArray.forEach(item => {
-
-      roomDrow(item, startCount);
-      startCount = startCount + randomNum(item.w + 1, 120);
-   });
-
-}
-roomRender();
+// function roomRender() {
+roomArray.forEach(item => {
+   roomDrow(item, startCount);
+   startCount = startCount + randomNum(item.w + 1, 100);
+});
+// }
+// roomRender();
 
 function roomDrow(item, coord) {
-   if ((coord + 1) % 40 == 0) {
-      coord = coord + randomNum(1, 40);
+
+   for (let i = 1; i <= 8; i++) {
+      let nextTempTile = coord + i;
+      if (nextTempTile % maxWidth == 0) {
+         coord = nextTempTile;
+      }
    }
+
+
    for (let i = 0; i < (item.h * maxWidth); i = i + maxWidth) {
       for (let j = i; j < (i + item.w); j++) {
+         // if (arrayField[j + coord] > (maxWidth * maxHeight)) {
+         //    roomDrow(item, startCount);
+         // }
          arrayField[j + coord].className = 'tile';
       }
    }
