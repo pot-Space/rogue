@@ -207,6 +207,9 @@ function onPlayerMove(event) {
    const currentTile = arrayField.indexOf(document.querySelector('.tileP'));
    let nextTile;
 
+   document.querySelector('.end').style.display = 'none';
+
+
    new Audio('sound/step.mp3').play();
 
    // направо
@@ -244,8 +247,6 @@ function onPlayerMove(event) {
    // атака
    if (event.code == 'Space') {
       event.preventDefault();
-      document.querySelector('.end').style.display = 'none';
-
 
       if (randomNum(0, 1) == 1) {
          new Audio('sound/attack_01.mp3').play();
@@ -377,7 +378,10 @@ function onAttack(currentTile, char) {
          if (item.classList.contains('tileE')) {
             for (let i = 0; i < arrayEnemy.length; i++) {
                if (item.id == arrayEnemy[i].name) {
-                  arrayEnemy[i].state.health = arrayEnemy[i].state.health - char.state.attackPower;
+                  arrayEnemy[i].state.health = arrayEnemy[i].state.health - player.state.attackPower;
+                  if (arrayEnemy[i].state.health < 0) {
+                     arrayEnemy[i].state.health = 0;
+                  }
 
                   if (arrayEnemy[i].state.health == 0) {
                      item.innerHTML = '';
@@ -402,6 +406,8 @@ function onAttack(currentTile, char) {
          document.removeEventListener('keydown', onPlayerMove);
          document.querySelector('.end>h2').innerHTML = 'Игра окончена';
          document.querySelector('.end').style.display = 'flex';
+
+         console.log('end');
       }
    }
 }
