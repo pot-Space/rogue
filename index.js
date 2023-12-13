@@ -377,7 +377,7 @@ function onAttack(currentTile, char) {
          if (item.classList.contains('tileE')) {
             for (let i = 0; i < arrayEnemy.length; i++) {
                if (item.id == arrayEnemy[i].name) {
-                  arrayEnemy[i].state.health = arrayEnemy[i].state.health - 1;
+                  arrayEnemy[i].state.health = arrayEnemy[i].state.health - char.state.attackPower;
 
                   if (arrayEnemy[i].state.health == 0) {
                      item.innerHTML = '';
