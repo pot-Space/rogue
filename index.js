@@ -1,8 +1,6 @@
 'use strict';
-
 const maxWidth = 40,
    maxHeight = 24;
-
 
 const field = document.querySelector('.field');
 
@@ -208,6 +206,9 @@ function onEnemyMove(char) {
 function onPlayerMove(event) {
    const currentTile = arrayField.indexOf(document.querySelector('.tileP'));
    let nextTile;
+
+   new Audio('sound/step.mp3').play();
+
    // направо
    if (event.code == 'KeyD' && (currentTile == 0 || (currentTile + 1) % maxWidth != 0)) {
       nextTile = arrayField[currentTile + 1];
@@ -243,6 +244,15 @@ function onPlayerMove(event) {
    // атака
    if (event.code == 'Space') {
       event.preventDefault();
+      document.querySelector('.end').style.display = 'none';
+
+
+      if (randomNum(0, 1) == 1) {
+         new Audio('sound/attack_01.mp3').play();
+      } else {
+         new Audio('sound/attack_02.mp3').play();
+      }
+
       setTileState(arrayField[currentTile], arrayField[currentTile], player);
       onAttack(currentTile, player);
       enemyAction();
@@ -283,7 +293,6 @@ function setTileState(currentTile, nextTile, char) {
    }
 
    if (!nextTile.classList.contains('tile')) {
-      console.log('true');
       currentTile.innerHTML = '';
       currentTile.append(health);
    }
@@ -390,9 +399,9 @@ function onAttack(currentTile, char) {
 
       if (player.state.health == 0) {
          document.querySelector('.tileP>.health').style.width = '0%';
-         console.log(document.querySelector('.tileP>.health'));
          document.removeEventListener('keydown', onPlayerMove);
-         document.querySelector('body h1').innerHTML = 'game over';
+         document.querySelector('.end>h2').innerHTML = 'Игра окончена';
+         document.querySelector('.end').style.display = 'flex';
       }
    }
 }

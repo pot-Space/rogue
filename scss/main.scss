@@ -7,17 +7,48 @@ body {
    color: #ffffff;
 }
 
-h1 {
+h1,
+h2 {
+   margin: 0px;
+   padding: 10px 0px;
    font-family: "Playfair Display";
    font-size: 30px;
-   padding: 10px 0px;
-   margin: 0px;
+}
+
+.container {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+
+   h1 {
+      width: fit-content;
+   }
 }
 
 .field-box {
+   position: relative;
    border: 2px solid #d0d0d0;
    width: fit-content;
    overflow: hidden;
+
+   .end {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(51, 51, 51, 70%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      h2 {
+         padding: 0;
+         font-size: 60px;
+         text-align: center;
+      }
+   }
 }
 
 .field {
@@ -76,20 +107,4 @@ h1 {
    .tileSW {
       background-image: url(../images/tile-SW.png);
    }
-}
-
-.inventory-box {
-   border: 2px solid #d0d0d0;
-   float: left;
-}
-
-.inventory {
-   position: relative;
-   width: 800px;
-   height: 32px;
-}
-
-.cl {
-   clear: both;
-   display: block;
 }
