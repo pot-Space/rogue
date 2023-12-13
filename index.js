@@ -1,9 +1,8 @@
 'use strict';
 
-// =================
 const maxWidth = 40,
    maxHeight = 24;
-// =================
+
 
 const field = document.querySelector('.field');
 
@@ -43,35 +42,13 @@ class Enemy {
 
 };
 
-for (let i = 0; i < maxWidth * maxHeight; i++) {
-   const tile = document.createElement('div');
-
-   // if (i == 0) {
-   //    tile.className = 'tileP';
-   //    field.append(tile);
-
-   // } else if (i == 47 || i == 15 || i == 14 || i == 40) {
-   //    tile.className = 'tileE';
-   //    tile.id = `e-${i}`;
-   //    field.append(tile);
-
-   // } else if (i == 2) {
-   //    tile.className = 'tileHP';
-   //    field.append(tile);
-
-   // } else if (i == 1) {
-   //    tile.className = 'tileSW';
-   //    field.append(tile);
-   // }
-   // else {
-   //    tile.className = 'tile';
-   //    field.append(tile);
-   // }
-
-   tile.className = 'tileW';
-   field.append(tile);
-}
-
+(function mapGenerating() {
+   for (let i = 0; i < maxWidth * maxHeight; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tileW';
+      field.append(tile);
+   }
+}())
 
 const arrayField = [...field.children]; // == Array.from()
 
@@ -119,7 +96,7 @@ function roomsGenerating() {
 }
 roomsGenerating();
 
-
+// Generating corridors
 function corridorsGenerating() {
    let corridorArray = [];
    let corridorCount = randomNum(3, 5);
@@ -134,13 +111,11 @@ function corridorsGenerating() {
          corridorArray.push(i * Math.floor((maxHeight - 2) / 5) * maxWidth);
       }
    }
-
    corridorArray.forEach(item => {
       for (let i = item; i < (item + maxWidth); i++) {
          arrayField[i].className = 'tile';
       }
    });
-   console.log(corridorArray);
 
 
    corridorArray = [];
@@ -156,15 +131,38 @@ function corridorsGenerating() {
          corridorArray.push(i * Math.floor((maxWidth - 2) / 5));
       }
    }
-
    corridorArray.forEach(item => {
       for (let i = item; i < (maxWidth * maxHeight); i = i + maxWidth) {
          arrayField[i].className = 'tile';
       }
    });
-
-   console.log(corridorArray);
 }
+
+// Adding enemies, player, items
+function getArrayFreeTile(array) {
+   return array.filter(item => item.classList.contains('tile'));
+}
+(function locate() {
+   // add player
+   getArrayFreeTile(arrayField)[randomNum(0, getArrayFreeTile(arrayField).length - 1)].className = 'tileP';
+   document.querySelector('.tileP').id = player.name;
+   // add swords
+   for (let i = 0; i < 2; i++) {
+      getArrayFreeTile(arrayField)[randomNum(0, getArrayFreeTile(arrayField).length - 1)].className = 'tileSW';
+   };
+   // add potions
+   for (let i = 0; i < 10; i++) {
+      getArrayFreeTile(arrayField)[randomNum(0, getArrayFreeTile(arrayField).length - 1)].className = 'tileHP';
+   };
+   // add enemies
+   for (let i = 0; i < 10; i++) {
+      const targetTile = randomNum(0, getArrayFreeTile(arrayField).length - 1),
+         targetArrey = getArrayFreeTile(arrayField)[targetTile];
+
+      targetArrey.className = 'tileE';
+      targetArrey.id = `e-${i}`;
+   };
+}())
 
 // Arrey of enemies
 const arrayEnemy = [];
@@ -172,6 +170,7 @@ document.querySelectorAll('.tileE').forEach(item => {
    arrayEnemy.push(new Enemy(item.id));
 });
 
+// Randomizer
 function randomNum(min, max) {
    const rand = min + Math.random() * (max + 1 - min);
    return Math.floor(rand);
@@ -209,7 +208,6 @@ function onEnemyMove(char) {
 function onPlayerMove(event) {
    const currentTile = arrayField.indexOf(document.querySelector('.tileP'));
    let nextTile;
-
    // направо
    if (event.code == 'KeyD' && (currentTile == 0 || (currentTile + 1) % maxWidth != 0)) {
       nextTile = arrayField[currentTile + 1];
@@ -273,7 +271,7 @@ function setPlayerState(classTile) {
 function setTileState(currentTile, nextTile, char) {
    const health = document.createElement('div');
    health.className = 'health';
-   health.style.width = `${(char.state.health - 1) * 100 / char.state.maxHealth}%`;
+   health.style.width = `${(char.state.health) * 100 / char.state.maxHealth}%`;
 
    if (arrayField.indexOf(currentTile) == arrayField.indexOf(nextTile)) {
       currentTile.innerHTML = '';
@@ -282,6 +280,12 @@ function setTileState(currentTile, nextTile, char) {
       nextTile.className = char.state.tile;
       nextTile.id = char.name;
       nextTile.append(health);
+   }
+
+   if (!nextTile.classList.contains('tile')) {
+      console.log('true');
+      currentTile.innerHTML = '';
+      currentTile.append(health);
    }
 
    if ((arrayField.indexOf(currentTile) != arrayField.indexOf(nextTile))
@@ -385,10 +389,13 @@ function onAttack(currentTile, char) {
       });
 
       if (player.state.health == 0) {
+         document.querySelector('.tileP>.health').style.width = '0%';
+         console.log(document.querySelector('.tileP>.health'));
          document.removeEventListener('keydown', onPlayerMove);
          document.querySelector('body h1').innerHTML = 'game over';
       }
    }
 }
+
 
 console.log(player);
