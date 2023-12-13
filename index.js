@@ -75,61 +75,109 @@ for (let i = 0; i < maxWidth * maxHeight; i++) {
 
 const arrayField = [...field.children]; // == Array.from()
 
+// Generating rooms
+function roomsGenerating() {
+   const roomArray = [];
+   const roomCount = randomNum(5, 10);
 
-// Cлучайное количество 5-10 tile с размерами 3-8 ДxШ
-// Cлучайное количество 3-5 по каждому направлению вертикальных и горизонтальных проходов в 1 tile
+   for (let i = 1; i <= roomCount; i++) {
+      roomArray.push({ h: randomNum(3, 8), w: randomNum(3, 8) });
+   }
 
-const roomArray = [];
-const roomCount = randomNum(5, 10);
+   let startCount = randomNum(0, 160);
+   roomArray.forEach(item => {
+      roomRender(item, startCount);
+      startCount = startCount + randomNum(item.w + 1, 120);
+   });
 
-for (let i = 1; i <= roomCount; i++) {
-   roomArray.push({ h: randomNum(3, 8), w: randomNum(3, 8) });
+   function roomRender(item, coord) {
+      for (let i = 1; i <= 8; i++) {
+         let nextTempTile = coord + i;
+         if (nextTempTile % maxWidth == 0) {
+            coord = nextTempTile;
+         }
+      }
+
+      for (let i = 0; i < (item.h * maxWidth); i = i + maxWidth) {
+         for (let j = i; j < (i + item.w); j++) {
+            if ((j + coord) >= (maxWidth * maxHeight)) {
+               coord = maxWidth * maxHeight - maxWidth * item.h;
+
+               for (let k = 1; k <= 8; k++) {
+                  let nextTempTile = coord + k;
+                  if (nextTempTile % maxWidth == 0) {
+                     coord = nextTempTile;
+                  }
+               }
+            } else {
+               arrayField[j + coord].className = 'tile';
+            }
+         }
+      }
+   }
+   corridorsGenerating();
 }
-console.log(roomArray);
+roomsGenerating();
 
 
-let startCount = randomNum(0, 160);
-
-// function roomRender() {
-roomArray.forEach(item => {
-   roomDrow(item, startCount);
-   startCount = startCount + randomNum(item.w + 1, 100);
-});
-// }
-// roomRender();
-
-function roomDrow(item, coord) {
-
-   for (let i = 1; i <= 8; i++) {
-      let nextTempTile = coord + i;
-      if (nextTempTile % maxWidth == 0) {
-         coord = nextTempTile;
+function corridorsGenerating() {
+   let corridorArray = [];
+   let corridorCount = randomNum(3, 5);
+   for (let i = 1; i <= corridorCount; i++) {
+      if (corridorCount == 3) {
+         corridorArray.push(i * Math.floor((maxHeight - 2) / 3) * maxWidth);
+      }
+      if (corridorCount == 4) {
+         corridorArray.push(i * Math.floor((maxHeight - 2) / 4) * maxWidth);
+      }
+      if (corridorCount == 5) {
+         corridorArray.push(i * Math.floor((maxHeight - 2) / 5) * maxWidth);
       }
    }
 
+   corridorArray.forEach(item => {
+      for (let i = item; i < (item + maxWidth); i++) {
+         arrayField[i].className = 'tile';
+      }
+   });
+   console.log(corridorArray);
 
-   for (let i = 0; i < (item.h * maxWidth); i = i + maxWidth) {
-      for (let j = i; j < (i + item.w); j++) {
-         // if (arrayField[j + coord] > (maxWidth * maxHeight)) {
-         //    roomDrow(item, startCount);
-         // }
-         arrayField[j + coord].className = 'tile';
+
+   corridorArray = [];
+   corridorCount = randomNum(3, 5);
+   for (let i = 1; i <= corridorCount; i++) {
+      if (corridorCount == 3) {
+         corridorArray.push(i * Math.floor((maxWidth - 2) / 3));
+      }
+      if (corridorCount == 4) {
+         corridorArray.push(i * Math.floor((maxWidth - 2) / 4));
+      }
+      if (corridorCount == 5) {
+         corridorArray.push(i * Math.floor((maxWidth - 2) / 5));
       }
    }
-};
 
-// ===================
-let arrayEnemy = [];
+   corridorArray.forEach(item => {
+      for (let i = item; i < (maxWidth * maxHeight); i = i + maxWidth) {
+         arrayField[i].className = 'tile';
+      }
+   });
+
+   console.log(corridorArray);
+}
+
+// Arrey of enemies
+const arrayEnemy = [];
 document.querySelectorAll('.tileE').forEach(item => {
    arrayEnemy.push(new Enemy(item.id));
 });
-// ===================
 
 function randomNum(min, max) {
    const rand = min + Math.random() * (max + 1 - min);
    return Math.floor(rand);
 }
 
+// Enemies movement
 function onEnemyMove(char) {
    const currentTile = char.currentTile();
    const side = randomNum(1, 4);
@@ -157,6 +205,7 @@ function onEnemyMove(char) {
    }
 }
 
+// Player movement
 function onPlayerMove(event) {
    const currentTile = arrayField.indexOf(document.querySelector('.tileP'));
    let nextTile;
@@ -203,6 +252,7 @@ function onPlayerMove(event) {
 }
 document.addEventListener('keydown', onPlayerMove);
 
+// Setting player status
 function setPlayerState(classTile) {
    switch (classTile) {
       case 'tileHP':
@@ -219,6 +269,7 @@ function setPlayerState(classTile) {
    }
 }
 
+// Tile setting
 function setTileState(currentTile, nextTile, char) {
    const health = document.createElement('div');
    health.className = 'health';
@@ -245,6 +296,7 @@ function setTileState(currentTile, nextTile, char) {
    }
 }
 
+// Enemies action
 function enemyAction() {
    arrayEnemy.forEach(char => {
       if (char.state.health > 0) {
@@ -265,6 +317,7 @@ function enemyAction() {
    });
 }
 
+// Area of attack
 function getAttackArea(currentTile) {
    const attackArea = [];
    // правый тайл
@@ -302,6 +355,7 @@ function getAttackArea(currentTile) {
    return attackArea;
 }
 
+// Player or enemies attack
 function onAttack(currentTile, char) {
    const attackArea = getAttackArea(currentTile);
 
